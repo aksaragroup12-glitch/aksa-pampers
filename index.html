@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aksa Pampers - Toko Online Resmi</title>
+    <!-- Menggunakan Tailwind CSS untuk Tampilan Cantik -->
+    <script src="https://tailwindcss.com"></script>
+</head>
+<body class="bg-blue-50 text-gray-800 antialiased">
+
+    <!-- Header dengan Logo & Tema Sesuai Foto Logo Anda -->
+    <header class="bg-sky-400 text-white p-4 sticky top-0 shadow-lg z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <!-- Pastikan file logo Anda disimpan dengan nama 'logo.png' di folder yang sama dengan index.html -->
+                <img src="logo.png" alt="Logo Aksa Pampers" class="w-12 h-12 rounded-full border-2 border-white object-cover">
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide leading-none">AKSA PAMPERS</h1>
+                    <p class="text-[10px] text-sky-100 italic mt-1">"Teman Setia Si Kecil Tumbuh Bahagia"</p>
+                </div>
+            </div>
+            <span class="text-xs bg-sky-500 font-semibold px-3 py-1.5 rounded-full shadow-inner">Order via WA</span>
+        </div>
+    </header>
+
+    <!-- Konten Utama -->
+    <main class="container mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Kolom Kiri: Daftar Produk Pampers -->
+        <div class="lg:col-span-2">
+            <h2 class="text-xl font-bold mb-4 text-gray-700 flex items-center gap-2">👶 Pilihan Pampers Si Kecil</h2>
+            
+            <!-- Indikator Loading saat memuat data dari Google Sheets -->
+            <div id="loading-status" class="text-center py-10 font-medium text-gray-500">
+                🔄 Sedang memuat produk dari toko... Mohon tunggu...
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 hidden" id="produk-container">
+                <!-- Produk dimasukkan otomatis oleh JavaScript dari Google Sheets -->
+            </div>
+        </div>
+
+        <!-- Kolom Kanan: Keranjang & Form Pembeli -->
+        <div class="space-y-6">
+            <!-- Ringkasan Keranjang -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-blue-100">
+                <h2 class="text-lg font-bold mb-4 text-gray-700 flex justify-between items-center">
+                    <span>🛒 Keranjang Belanja</span>
+                    <span id="total-item" class="text-xs bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full font-semibold">0 Barang</span>
+                </h2>
+                
+                <div id="keranjang-list" class="space-y-3 max-h-52 overflow-y-auto mb-4 text-sm">
+                    <p class="text-gray-400 italic py-4 text-center">Keranjang masih kosong.</p>
+                </div>
+                
+                <div class="border-t pt-4 flex justify-between font-extrabold text-lg text-gray-900 mb-2">
+                    <span>Total Transaksi:</span>
+                    <span id="total-harga" class="text-sky-600">Rp 0</span>
+                </div>
+            </div>
+
+            <!-- Form Data Pengiriman -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-blue-100">
+                <h2 class="text-lg font-bold mb-4 text-gray-700">📋 Data Pengiriman</h2>
+                <form id="form-order" onsubmit="prosesCheckout(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Nama Lengkap</label>
+                        <input type="text" id="buyer-name" required placeholder="Contoh: Bunda Lestari" class="w-full border border-gray-200 rounded-lg p-2 text-sm focus:outline-none focus:border-sky-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">No. WhatsApp Aktif</label>
+                        <input type="tel" id="buyer-phone" required placeholder="Contoh: 08123456789" class="w-full border border-gray-200 rounded-lg p-2 text-sm focus:outline-none focus:border-sky-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Alamat Lengkap Rumah</label>
+                        <textarea id="buyer-address" required rows="3" placeholder="Nama jalan, RT/RW, nomor rumah, kecamatan, dan kota." class="w-full border border-gray-200 rounded-lg p-2 text-sm focus:outline-none focus:border-sky-400"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Link Sharelok (Google Maps)</label>
+                        <input type="url" id="buyer-sharelok" placeholder="Tempel link lokasi maps di sini" class="w-full border border-gray-200 rounded-lg p-2 text-sm focus:outline-none focus:border-sky-400">
+                        <p class="text-[11px] text-gray-400 mt-1">Buka Google Maps -> Klik Bagikan lokasi -> Salin Link -> Tempel disini.</p>
+                    </div>
+
+                    <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition duration-200 flex items-center justify-center gap-2 mt-2">
+                        🟢 Kirim Pesanan ke WhatsApp Admin
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // ==================== PENGATURAN UTAMA TOKO ANDA ====================
+        // 1. ⚠️ GANTI dengan ID Google Sheets Anda yang disalin di Langkah 1 tadi:
+        const SPREADSHEET_ID = "1Oo4qpuql42lgqmT6gMYn9Oo1b3S-LDp2PuTnaXc00kk"; 
+        
+        // 2. ⚠️ GANTI dengan Nomor WhatsApp Toko Anda (Wajib gunakan kode negara 62 di depan):
+        const NOMOR_WHATSAPP_TOKO = "6281313270660"; 
+        // ====================================================================
+
+        let daftarProduk = [];
+        let keranjang = [];
+
+        // Fungsi Mengambil Data Otomatis dari Google Sheets secara Realtime
+        async function ambilDataDariSheets() {
+            // Menggunakan format output tsv (tab-separated values) bawaan Google agar mudah dibaca sistem
+            const url = `https://google.com{SPREADSHEET_ID}/export?format=tsv`;
+            
+            try {
+                const response = await fetch(url);
+                const dataText = await response.text();
+                
+                // Mengubah teks tabel baris & kolom menjadi format kode (Array Object)
+                const baris = dataText.split("\n");
+                const headers = baris[0].split("\t").map(h => h.trim());
+                
+                daftarProduk = [];
+                for(let i = 1; i < baris.length; i++) {
+                    if(!baris[i]) continue;
+                    const kolom = baris[i].split("\t");
+                    let produk = {};
+                    headers.forEach((header, index) => {
+                        produk[header] = kolom[index] ? kolom[index].trim() : "";
+                    });
+                    
+                    // Rapikan format angka harga & ID produk
+                    produk.id = parseInt(produk.id);
+                    produk.harga = parseInt(produk.harga.replace(/[^0-9]/g, '')) || 0;
+                    
+                    daftarProduk.push(produk);
+                }
+                
+                // Sembunyikan tulisan loading, tampilkan produk toko
+                document.getElementById('loading-status').classList.add('hidden');
+                document.getElementById('produk-container').classList.remove('hidden');
+                renderProduk();
+                
+            } catch (error) {
+                console.error("Gagal memuat Google Sheets:", error);
+                document.getElementById('loading-status').innerText = "❌ Gagal memuat data produk. Pastikan pengaturan Share/Bagikan Google Sheets Anda sudah diatur 'Anyone with the link'.";
+            }
+        }
+
+        // Menampilkan produk hasil dari Google Sheets ke halaman web
+        function renderProduk() {
+            const container = document.getElementById('produk-container');
+            if(daftarProduk.length === 0) {
+                container.innerHTML = `<p class="text-center col-span-2 text-gray-500 italic py-6">Belum ada produk yang dimasukkan di Google Sheets.</p>`;
+                return;
+            }
+            
+            container.innerHTML = daftarProduk.map(produk => `
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex flex-col justify-between hover:shadow-md transition">
+                    <div>
+                        <img src="${produk.foto || 'https://placeholder.com'}" alt="${produk.nama}" class="w-full h-44 object-cover rounded-xl mb-3 bg-gray-50">
+                        <span class="text-[10px] uppercase font-bold tracking-wider bg-blue-50 text-blue-600 px-2 py-1 rounded-md">${produk.kategori}</span>
+                        <h3 class="font-bold text-gray-800 text-base mt-2 line-clamp-2">${produk.nama}</h3>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-sky-600 font-extrabold text-base">Rp ${produk.harga.toLocaleString('id-ID')}</p>
+                        <button onclick="tambahKeKeranjang(${produk.id})" class="mt-2 w-full bg-sky-50 hover:bg-sky-100 text-sky-700 font-bold text-xs py-2.5 rounded-xl transition">
+                            🛒 + Keranjang
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function tambahKeKeranjang(id) {
+            const produk = daftarProduk.find(p => p.id === id);
